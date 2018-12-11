@@ -1,0 +1,84 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Grouping - OrgChart JS | BALKANGraph</title>
+    <script src="~/js/jquery.js"></script>
+    <script src="~/js/orgchart.js"></script>
+
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            font-family: Helvetica;
+        }
+
+        #tree {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="tree"></div>
+
+    <script type="text/javascript">
+
+        function update(sender, oldNode, newNode) {
+            console.log("oldNode " + JSON.stringify(oldNode));
+            console.log("newNode " + JSON.stringify(newNode));
+            $.post("@Url.Action("Update")", { id: newNode.id, node: JSON.stringify(newNode) });
+        }
+
+        function add(sender, node) {
+            $.post("@Url.Action("Add")", { id: node.id, node: JSON.stringify(node) });
+        }
+
+        function remove(sender, nodeId) {
+            $.post("@Url.Action("Remove")", { id: nodeId });
+        }
+        function updateTags(sender, tags) {
+            $.post("@Url.Action("UpdateTags")", { tags: JSON.stringify(tags) });
+        }
+
+        $.getJSON("@Url.Action("Read")", function (response) {
+            var chart = new OrgChart(document.getElementById("tree"), {
+                template: "olivia",
+                enableDragDrop: true,
+                nodeMouseClickBehaviour: BALKANGraph.action.edit,
+                onUpdate: update,
+                onAdd: add,
+                onRemove: remove,
+                onUpdateTags: updateTags,
+                nodeMenu: {
+                    details: { text: "Details" },
+                    edit: { text: "Edit" },
+                    add: { text: "Add" },
+                    remove: { text: "Remove" }
+                },
+                dragDropMenu: {
+                    addInGroup: { text: "Add in group" },
+                    addAsChild: { text: "Add as child" }
+                },
+                nodeBinding: {
+                    field_0: "name",
+                    field_1: "title",
+                    img_0: "img"
+                },
+                tags: response.tags,
+                nodes: response.nodes
+            });    
+    });
+    </script>
+</body>
+</html>
